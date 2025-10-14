@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+const db = require('../database/db');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -12,10 +13,82 @@ router.post('/debot-signals', function(req, res, next) {
   console.log('Content-Type:', req.get('Content-Type'));
   console.log('Request body:', JSON.stringify(req.body, null, 2));
   
-  // 返回成功响应
-  res.status(200).json({ 
-    message: 'Request received successfully',
-    timestamp: new Date().toISOString()
+  // 获取请求体数据
+  const { timestamp, signalCount, signals } = req.body;
+  
+  // 统计插入和跳过的记录数
+  let insertedCount = 0;
+  let skippedCount = 0;
+  let processedCount = 0;
+  
+  // 处理每个信号
+  signals.forEach((signal, index) => {
+    // 将 signalIndex 转换为整数
+    const signalIndexInt = parseInt(signal.signalIndex, 10);
+    
+    // 使用 INSERT OR IGNORE 来避免重复数据
+    db.run(`INSERT OR IGNORE INTO signals (
+      timestamp, signalCount, signalIndex, tokenAddress, tokenName, 
+      maxIncrease, smartWalletCount, avgBuyAmount, marketCapBefore, 
+      marketCapAfter, priceBefore, priceAfter
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      timestamp,
+      signalCount,
+      signalIndexInt,
+      signal.tokenAddress,
+      signal.tokenName,
+      signal.maxIncrease,
+      signal.smartWalletCount,
+      signal.avgBuyAmount,
+      signal.marketCapBefore,
+      signal.marketCapAfter,
+      signal.priceBefore,
+      signal.priceAfter
+    ], function(err) {
+      processedCount++;
+      
+      if (err) {
+        console.error('Error inserting signal:', err.message);
+      } else {
+        // 如果 lastID 存在，说明插入了新记录
+        if (this.lastID) {
+          console.log(`Signal ${signalIndexInt} for token ${signal.tokenAddress} inserted with rowid ${this.lastID}`);
+          insertedCount++;
+        } else {
+          console.log(`Signal ${signalIndexInt} for token ${signal.tokenAddress} already exists, skipped.`);
+          skippedCount++;
+        }
+      }
+      
+      // 当所有记录都处理完时，返回响应
+      if (processedCount === signals.length) {
+        // 返回成功响应
+        res.status(200).json({ 
+          message: 'Request received successfully and data processed',
+          timestamp: new Date().toISOString(),
+          signalCount: signals.length,
+          insertedCount: insertedCount,
+          skippedCount: skippedCount
+        });
+      }
+    });
+  });
+});
+
+/* GET /signals - 查询所有信号数据 */
+router.get('/signals', function(req, res, next) {
+  db.all('SELECT * FROM signals ORDER BY id DESC', [], (err, rows) => {
+    if (err) {
+      console.error('Error querying database:', err.message);
+      res.status(500).json({ error: 'Database query error' });
+    } else {
+      res.status(200).json({ 
+        message: 'Signals retrieved successfully',
+        count: rows.length,
+        signals: rows
+      });
+    }
   });
 });
 
