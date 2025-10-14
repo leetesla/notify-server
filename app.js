@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var cors = require('cors');
 
 // 引入配置文件
 const config = require('./config');
@@ -15,6 +16,9 @@ var app = express();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
+
+// 配置CORS中间件，允许所有来源的跨域请求
+app.use(cors());
 
 app.use(logger('dev'));
 app.use(express.json());
