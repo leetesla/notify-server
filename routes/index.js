@@ -58,52 +58,85 @@ router.post('/debot-signals', function(req, res, next) {
       maxIncreaseFormatted = signal.maxIncrease;
     }
     
-    // 使用 INSERT OR IGNORE 来避免重复数据
-    db.run(`INSERT OR IGNORE INTO signals (
-      signalIndex, tokenAddress, tokenName, 
-      maxIncrease, maxIncreaseRaw, smartWalletCount, avgBuyAmount, marketCapBeforeRaw, 
-      marketCapAfterRaw, marketCapBefore, marketCapAfter, priceBefore, priceAfter
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [
-      signalIndexInt,
-      signal.tokenAddress,
-      signal.tokenName,
-      maxIncreaseFormatted,
-      maxIncreaseRaw,
-      smartWalletCountInt,
-      signal.avgBuyAmount,
-      marketCapBeforeRaw,
-      marketCapAfterRaw,
-      marketCapBeforeFormatted,
-      marketCapAfterFormatted,
-      signal.priceBefore,
-      signal.priceAfter
-    ], function(err) {
-      processedCount++;
-      
+    // 先查询记录是否存在，避免ID增长过快
+    db.get(`SELECT id FROM signals WHERE tokenAddress = ? AND signalIndex = ?`, 
+      [signal.tokenAddress, signalIndexInt], (err, row) => {
       if (err) {
-        console.error('Error inserting signal:', err.message);
-      } else {
-        // 如果 lastID 存在，说明插入了新记录
-        if (this.lastID) {
-          console.log(`Signal ${signalIndexInt} for token ${signal.tokenAddress} inserted with rowid ${this.lastID}`);
-          insertedCount++;
-        } else {
-          console.log(`Signal ${signalIndexInt} for token ${signal.tokenAddress} already exists, skipped.`);
-          skippedCount++;
+        console.error('Error checking existing signal:', err.message);
+        processedCount++;
+        if (processedCount === signals.length) {
+          // 返回响应
+          res.status(200).json({ 
+            message: 'Request received successfully and data processed',
+            timestamp: new Date().toISOString(),
+            signalCount: signals.length,
+            insertedCount: insertedCount,
+            skippedCount: skippedCount
+          });
         }
+        return;
       }
       
-      // 当所有记录都处理完时，返回响应
-      if (processedCount === signals.length) {
-        // 返回成功响应
-        res.status(200).json({ 
-          message: 'Request received successfully and data processed',
-          timestamp: new Date().toISOString(),
-          signalCount: signals.length,
-          insertedCount: insertedCount,
-          skippedCount: skippedCount
+      // 如果记录不存在，则插入新记录
+      if (!row) {
+        db.run(`INSERT INTO signals (
+          signalIndex, tokenAddress, tokenName, 
+          maxIncrease, maxIncreaseRaw, smartWalletCount, avgBuyAmount, marketCapBeforeRaw, 
+          marketCapAfterRaw, marketCapBefore, marketCapAfter, priceBefore, priceAfter
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          signalIndexInt,
+          signal.tokenAddress,
+          signal.tokenName,
+          maxIncreaseFormatted,
+          maxIncreaseRaw,
+          smartWalletCountInt,
+          signal.avgBuyAmount,
+          marketCapBeforeRaw,
+          marketCapAfterRaw,
+          marketCapBeforeFormatted,
+          marketCapAfterFormatted,
+          signal.priceBefore,
+          signal.priceAfter
+        ], function(err) {
+          processedCount++;
+          
+          if (err) {
+            console.error('Error inserting signal:', err.message);
+          } else {
+            console.log(`Signal ${signalIndexInt} for token ${signal.tokenAddress} inserted with rowid ${this.lastID}`);
+            insertedCount++;
+          }
+          
+          // 当所有记录都处理完时，返回响应
+          if (processedCount === signals.length) {
+            // 返回成功响应
+            res.status(200).json({ 
+              message: 'Request received successfully and data processed',
+              timestamp: new Date().toISOString(),
+              signalCount: signals.length,
+              insertedCount: insertedCount,
+              skippedCount: skippedCount
+            });
+          }
         });
+      } else {
+        // 记录已存在，跳过插入
+        console.log(`Signal ${signalIndexInt} for token ${signal.tokenAddress} already exists, skipped.`);
+        skippedCount++;
+        processedCount++;
+        
+        // 当所有记录都处理完时，返回响应
+        if (processedCount === signals.length) {
+          // 返回成功响应
+          res.status(200).json({ 
+            message: 'Request received successfully and data processed',
+            timestamp: new Date().toISOString(),
+            signalCount: signals.length,
+            insertedCount: insertedCount,
+            skippedCount: skippedCount
+          });
+        }
       }
     });
   });
