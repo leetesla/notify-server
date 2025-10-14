@@ -12,7 +12,7 @@ router.get('/', function(req, res, next) {
 router.post('/debot-signals', function(req, res, next) {
   console.log('Received POST request at /debot-signals');
   console.log('Content-Type:', req.get('Content-Type'));
-  console.log('Request body:', formatJson(req.body));
+  // console.log('Request body:', formatJson(req.body));
   
   // 获取请求体数据
   const { signals } = req.body;
