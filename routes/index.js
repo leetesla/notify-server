@@ -15,7 +15,7 @@ router.post('/debot-signals', function(req, res, next) {
   console.log('Request body:', JSON.stringify(req.body, null, 2));
   
   // 获取请求体数据
-  const { timestamp, signalCount, signals } = req.body;
+  const { signals } = req.body;
   
   // 统计插入和跳过的记录数
   let insertedCount = 0;
@@ -60,13 +60,11 @@ router.post('/debot-signals', function(req, res, next) {
     
     // 使用 INSERT OR IGNORE 来避免重复数据
     db.run(`INSERT OR IGNORE INTO signals (
-      timestamp, signalCount, signalIndex, tokenAddress, tokenName, 
+      signalIndex, tokenAddress, tokenName, 
       maxIncrease, maxIncreaseRaw, smartWalletCount, avgBuyAmount, marketCapBeforeRaw, 
       marketCapAfterRaw, marketCapBefore, marketCapAfter, priceBefore, priceAfter
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
-      timestamp,
-      signalCount,
       signalIndexInt,
       signal.tokenAddress,
       signal.tokenName,

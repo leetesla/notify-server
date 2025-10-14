@@ -25,8 +25,6 @@ db.serialize(() => {
   // 重新创建表
   db.run(`CREATE TABLE signals (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    timestamp TEXT,
-    signalCount INTEGER,
     signalIndex INTEGER,
     tokenAddress TEXT,
     tokenName TEXT,

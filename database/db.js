@@ -16,8 +16,6 @@ db.serialize(() => {
   // 创建表
   db.run(`CREATE TABLE IF NOT EXISTS signals (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    timestamp TEXT,
-    signalCount INTEGER,
     signalIndex INTEGER,
     tokenAddress TEXT,
     tokenName TEXT,
