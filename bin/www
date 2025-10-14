@@ -8,11 +8,14 @@ var app = require('../app');
 var debug = require('debug')('notify-server:server');
 var http = require('http');
 
+// 引入配置文件
+const config = require('../config');
+
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+var port = normalizePort(config.port);
 app.set('port', port);
 
 /**
