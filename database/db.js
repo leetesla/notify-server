@@ -22,6 +22,7 @@ db.serialize(() => {
     tokenAddress TEXT,
     tokenName TEXT,
     maxIncrease TEXT,
+    maxIncreaseRaw TEXT,
     smartWalletCount INTEGER,
     avgBuyAmount REAL,
     marketCapBeforeRaw TEXT,
@@ -30,7 +31,7 @@ db.serialize(() => {
     marketCapAfter REAL,
     priceBefore REAL,
     priceAfter REAL,
-    createdAt TEXT DEFAULT CURRENT_TIMESTAMP
+    createdAt DATETIME DEFAULT (datetime('now', '+8 hours'))
   )`, (err) => {
     if (err) {
       console.error('Error creating table:', err.message);

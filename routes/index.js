@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const db = require('../database/db');
-const { formatMarketCap, toInteger } = require('../utils/formatters');
+const { formatMarketCap, toInteger, formatMultiplier, formatPercentage } = require('../utils/formatters');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -38,19 +38,40 @@ router.post('/debot-signals', function(req, res, next) {
     const marketCapBeforeFormatted = formatMarketCap(signal.marketCapBefore);
     const marketCapAfterFormatted = formatMarketCap(signal.marketCapAfter);
     
+    // 保存原始的 maxIncrease 数据
+    const maxIncreaseRaw = signal.maxIncrease;
+    
+    // 格式化 maxIncrease 数据
+    let maxIncreaseFormatted;
+    if (typeof signal.maxIncrease === 'string') {
+      if (signal.maxIncrease.includes('x')) {
+        // 处理倍数类型 (<1x, Nx)
+        maxIncreaseFormatted = formatMultiplier(signal.maxIncrease);
+      } else if (signal.maxIncrease.includes('%')) {
+        // 处理百分比类型
+        maxIncreaseFormatted = formatPercentage(signal.maxIncrease);
+      } else {
+        // 其他情况尝试直接转换
+        maxIncreaseFormatted = parseFloat(signal.maxIncrease) || signal.maxIncrease;
+      }
+    } else {
+      maxIncreaseFormatted = signal.maxIncrease;
+    }
+    
     // 使用 INSERT OR IGNORE 来避免重复数据
     db.run(`INSERT OR IGNORE INTO signals (
       timestamp, signalCount, signalIndex, tokenAddress, tokenName, 
-      maxIncrease, smartWalletCount, avgBuyAmount, marketCapBeforeRaw, 
+      maxIncrease, maxIncreaseRaw, smartWalletCount, avgBuyAmount, marketCapBeforeRaw, 
       marketCapAfterRaw, marketCapBefore, marketCapAfter, priceBefore, priceAfter
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       timestamp,
       signalCount,
       signalIndexInt,
       signal.tokenAddress,
       signal.tokenName,
-      signal.maxIncrease,
+      maxIncreaseFormatted,
+      maxIncreaseRaw,
       smartWalletCountInt,
       signal.avgBuyAmount,
       marketCapBeforeRaw,
