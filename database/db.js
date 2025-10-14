@@ -22,12 +22,14 @@ db.serialize(() => {
     tokenAddress TEXT,
     tokenName TEXT,
     maxIncrease TEXT,
-    smartWalletCount TEXT,
-    avgBuyAmount TEXT,
-    marketCapBefore TEXT,
-    marketCapAfter TEXT,
-    priceBefore TEXT,
-    priceAfter TEXT,
+    smartWalletCount INTEGER,
+    avgBuyAmount REAL,
+    marketCapBeforeRaw TEXT,
+    marketCapAfterRaw TEXT,
+    marketCapBefore REAL,
+    marketCapAfter REAL,
+    priceBefore REAL,
+    priceAfter REAL,
     createdAt TEXT DEFAULT CURRENT_TIMESTAMP
   )`, (err) => {
     if (err) {

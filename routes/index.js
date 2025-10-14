@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const db = require('../database/db');
+const { formatMarketCap, toInteger } = require('../utils/formatters');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -24,14 +25,25 @@ router.post('/debot-signals', function(req, res, next) {
   // 处理每个信号
   signals.forEach((signal, index) => {
     // 将 signalIndex 转换为整数
-    const signalIndexInt = parseInt(signal.signalIndex, 10);
+    const signalIndexInt = toInteger(signal.signalIndex);
+    
+    // 将 smartWalletCount 转换为整数
+    const smartWalletCountInt = toInteger(signal.smartWalletCount);
+    
+    // 保存原始的 marketCap 数据
+    const marketCapBeforeRaw = signal.marketCapBefore;
+    const marketCapAfterRaw = signal.marketCapAfter;
+    
+    // 格式化 marketCapBefore 和 marketCapAfter
+    const marketCapBeforeFormatted = formatMarketCap(signal.marketCapBefore);
+    const marketCapAfterFormatted = formatMarketCap(signal.marketCapAfter);
     
     // 使用 INSERT OR IGNORE 来避免重复数据
     db.run(`INSERT OR IGNORE INTO signals (
       timestamp, signalCount, signalIndex, tokenAddress, tokenName, 
-      maxIncrease, smartWalletCount, avgBuyAmount, marketCapBefore, 
-      marketCapAfter, priceBefore, priceAfter
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      maxIncrease, smartWalletCount, avgBuyAmount, marketCapBeforeRaw, 
+      marketCapAfterRaw, marketCapBefore, marketCapAfter, priceBefore, priceAfter
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       timestamp,
       signalCount,
@@ -39,10 +51,12 @@ router.post('/debot-signals', function(req, res, next) {
       signal.tokenAddress,
       signal.tokenName,
       signal.maxIncrease,
-      signal.smartWalletCount,
+      smartWalletCountInt,
       signal.avgBuyAmount,
-      signal.marketCapBefore,
-      signal.marketCapAfter,
+      marketCapBeforeRaw,
+      marketCapAfterRaw,
+      marketCapBeforeFormatted,
+      marketCapAfterFormatted,
       signal.priceBefore,
       signal.priceAfter
     ], function(err) {
