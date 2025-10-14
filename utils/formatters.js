@@ -88,9 +88,19 @@ function formatPercentage(value) {
   return parseFloat(formattedValue) || 0;
 }
 
+/**
+ * 格式化对象为美化后的JSON字符串
+ * @param {object} obj - 要格式化的对象
+ * @returns {string} 格式化后的JSON字符串
+ */
+function formatJson(obj) {
+  return JSON.stringify(obj, null, 2);
+}
+
 module.exports = {
   formatMarketCap,
   toInteger,
   formatMultiplier,
-  formatPercentage
+  formatPercentage,
+  formatJson
 };

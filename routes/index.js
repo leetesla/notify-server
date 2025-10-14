@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const db = require('../database/db');
-const { formatMarketCap, toInteger, formatMultiplier, formatPercentage } = require('../utils/formatters');
+const { formatMarketCap, toInteger, formatMultiplier, formatPercentage, formatJson } = require('../utils/formatters');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -12,7 +12,7 @@ router.get('/', function(req, res, next) {
 router.post('/debot-signals', function(req, res, next) {
   console.log('Received POST request at /debot-signals');
   console.log('Content-Type:', req.get('Content-Type'));
-  console.log('Request body:', JSON.stringify(req.body, null, 2));
+  console.log('Request body:', formatJson(req.body));
   
   // 获取请求体数据
   const { signals } = req.body;
