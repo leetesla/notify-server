@@ -1,0 +1,58 @@
+const { main } = require('../scripts/fetchDexPriceInfo');
+
+// 定义等待时间变量（毫秒）
+const LOOP_INTERVAL = 5000; // 5秒
+const SHUTDOWN_INTERVAL = 1000; // 1秒（用于关闭前的倒计时）
+
+// 演示脚本：循环执行直到收到退出信号
+let isRunning = true;
+let executionCount = 0;
+
+console.log('Demo loop script started. Press Ctrl+C to exit.');
+
+// 优雅关闭处理
+process.on('SIGINT', () => {
+  console.log('\nReceived SIGINT signal, shutting down gracefully...');
+  isRunning = false;
+});
+
+process.on('SIGTERM', () => {
+  console.log('\nReceived SIGTERM signal, shutting down gracefully...');
+  isRunning = false;
+});
+
+async function runLoop() {
+  while (isRunning) {
+    executionCount++;
+    console.log(`\n--- Execution #${executionCount} ---`);
+    
+    try {
+      await main();
+      console.log(`Execution #${executionCount} completed successfully.`);
+      
+      console.log(`Waiting ${LOOP_INTERVAL/1000} seconds before next loop...`);
+      await new Promise(resolve => setTimeout(resolve, LOOP_INTERVAL));
+    } catch (error) {
+      console.error(`Error in execution #${executionCount}:`, error.message);
+    }
+    
+    // 如果仍在运行，等待一段时间再继续
+    // if (isRunning) {
+    //   const shutdownWaitTime = 10; // 10秒
+    //   console.log(`Waiting ${shutdownWaitTime} seconds before next execution...`);
+    //   for (let i = shutdownWaitTime; i > 0 && isRunning; i--) {
+    //     console.log(`Next execution in ${i} seconds...`);
+    //     await new Promise(resolve => setTimeout(resolve, SHUTDOWN_INTERVAL));
+    //   }
+    // }
+  }
+  
+  console.log('Demo loop script terminated.');
+  process.exit(0);
+}
+
+// 启动循环
+runLoop().catch(error => {
+  console.error('Unexpected error in demo loop:', error);
+  process.exit(1);
+});
