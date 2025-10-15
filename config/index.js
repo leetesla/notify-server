@@ -8,6 +8,8 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 const config = {
   // 服务配置
   port: process.env.PORT || 3000,
+  OKX_PROXY_API_SECRET: process.env.OKX_PROXY_API_SECRET || '',
+  OKX_PROXY_API_URL: process.env.OKX_PROXY_API_URL || '',
   
   // 数据库配置（示例）
   // database: {
