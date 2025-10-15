@@ -8,8 +8,12 @@ var cors = require('cors');
 // 引入配置文件
 const config = require('./config');
 
+// 初始化 Redis 客户端
+const redisClient = require('./config/redis');
+
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var redisRouter = require('./routes/redis');
 
 var app = express();
 
@@ -28,9 +32,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-
-// 使用配置文件中的端口设置
-app.set('port', config.port);
+app.use('/redis', redisRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

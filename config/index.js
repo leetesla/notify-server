@@ -11,6 +11,10 @@ const config = {
   OKX_PROXY_API_SECRET: process.env.OKX_PROXY_API_SECRET || '',
   OKX_PROXY_API_URL: process.env.OKX_PROXY_API_URL || '',
   
+  // Redis 配置
+  REDIS_URL: process.env.REDIS_URL || 'redis://localhost:6379',
+  REDIS_PASSWORD: process.env.REDIS_PASSWORD || '',
+  
   // 数据库配置（示例）
   // database: {
   //   host: process.env.DB_HOST || 'localhost',

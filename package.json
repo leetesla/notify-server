@@ -20,6 +20,7 @@
     "dotenv": "^16.0.3",
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
+    "ioredis": "^5.8.1",
     "morgan": "~1.9.1",
     "play-sound": "^1.1.6",
     "pug": "2.0.0-beta11",
