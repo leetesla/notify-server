@@ -6,7 +6,7 @@ let canPlay = false;
 let isPlaying = false;
 
 // 将硬编码的等待时间提取为常量
-const PLAY_INTERVAL = 5000; // 5秒
+const PLAY_INTERVAL = 2000; // 5秒
 
 // 检查Redis中ALERT_LIVE键的值来设置canPlay状态
 async function updateCanPlayStatus() {
@@ -110,7 +110,7 @@ process.on('SIGTERM', () => {
 // 添加 main 函数，只在直接运行脚本时执行
 async function main() {
     // 检查是否提供了音频文件路径参数
-    const filePath = 'assets/audio/alert.mp3';
+    const filePath = 'assets/audio/alert.m4a';
     // if (!filePath) {
     //     console.error('请提供音频文件路径作为参数');
     //     process.exit(1);
