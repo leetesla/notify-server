@@ -5,6 +5,12 @@ const path = require('path');
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 // 配置对象
+// Redis 键常量定义
+const REDIS_KEYS = {
+  ALERT_LOG: 'ALERT_LOG',
+  ALERT_LIVE: 'ALERT_LIVE'
+};
+
 const config = {
   // 服务配置
   port: process.env.PORT || 3000,
@@ -14,6 +20,9 @@ const config = {
   // Redis 配置
   REDIS_URL: process.env.REDIS_URL || 'redis://localhost:6379',
   REDIS_PASSWORD: process.env.REDIS_PASSWORD || '',
+  
+  // Redis 键常量
+  REDIS_KEYS,
   
   // 数据库配置（示例）
   // database: {
