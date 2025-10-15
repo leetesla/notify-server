@@ -28,7 +28,7 @@ db.serialize(() => {
     signalIndex INTEGER,
     tokenAddress TEXT,
     tokenName TEXT,
-    maxIncrease TEXT,
+    maxIncrease REAL,
     maxIncreaseRaw TEXT,
     smartWalletCount INTEGER,
     avgBuyAmount REAL,
