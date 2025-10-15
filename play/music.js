@@ -1,10 +1,48 @@
 const player = require('play-sound')();
 const fs = require('fs').promises;
-let canPlay = true;
+const redisClient = require('../config/redis');
+const config = require('../config');
+let canPlay = false;
 let isPlaying = false;
 
 // 将硬编码的等待时间提取为常量
 const PLAY_INTERVAL = 5000; // 5秒
+
+// 检查Redis中ALERT_LIVE键的值来设置canPlay状态
+async function updateCanPlayStatus() {
+    try {
+        // 先检查键的类型
+        const keyType = await redisClient.type(config.REDIS_KEYS.ALERT_LIVE);
+        
+        let alertLiveValue;
+        if (keyType === 'list') {
+            // 如果是list类型，获取列表长度
+            const listLength = await redisClient.llen(config.REDIS_KEYS.ALERT_LIVE);
+            alertLiveValue = listLength > 0 ? 'non-empty' : null;
+        } else if (keyType === 'string') {
+            // 如果是string类型，直接获取值
+            alertLiveValue = await redisClient.get(config.REDIS_KEYS.ALERT_LIVE);
+        } else if (keyType === 'set') {
+            // 如果是set类型，获取集合大小
+            const setSize = await redisClient.scard(config.REDIS_KEYS.ALERT_LIVE);
+            alertLiveValue = setSize > 0 ? 'non-empty' : null;
+        } else if (keyType === 'hash') {
+            // 如果是hash类型，获取哈希大小
+            const hashSize = await redisClient.hlen(config.REDIS_KEYS.ALERT_LIVE);
+            alertLiveValue = hashSize > 0 ? 'non-empty' : null;
+        } else {
+            // 其他类型默认设为null
+            alertLiveValue = null;
+        }
+        
+        canPlay = alertLiveValue !== null && alertLiveValue !== '';
+        console.log(`根据Redis键 ${config.REDIS_KEYS.ALERT_LIVE} (类型: ${keyType}) 的值更新 canPlay 状态: ${canPlay}`);
+    } catch (error) {
+        console.error('检查Redis键值时出错:', error.message);
+        // 出错时默认设置为false，避免意外播放
+        canPlay = false;
+    }
+}
 
 // 添加设置 canPlay 状态的函数
 function setCanPlay(value) {
@@ -25,7 +63,10 @@ async function conditionalLoopPlay(filePath) {
     let playCount = 0;
 
     // 无限循环，直到收到退出信号
-    while (canPlay) {
+    while (true) {
+        // 检查Redis中ALERT_LIVE键的值来更新canPlay状态
+        await updateCanPlayStatus();
+        
         // 只在播放前判断 canPlay 状态
         if (canPlay) {
             isPlaying = true;
