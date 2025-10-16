@@ -41,15 +41,21 @@ async function saveDexPriceData(data, tokenNameMap = new Map()) {
         .tag('token', tag)
         .timestamp(new Date(timeInMinutes), 'ms');
       
-      // 添加字段，统一使用字符串类型存储所有字段值
+      // 添加字段，除了tokenContractAddress外都按数字存储
       for (const [key, value] of Object.entries(item)) {
-        // 跳过时间戳和地址字段，因为它们已经用于 tag 或时间戳
-        if (key === 'time' || key === 'tokenContractAddress') {
+        // 跳过时间戳字段，因为它已经用于时间戳
+        if (key === 'time') {
           continue;
         }
         
-        // 统一使用字符串类型存储所有字段值
-        point.stringField(key, String(value));
+        // tokenContractAddress作为字符串存储
+        if (key === 'tokenContractAddress') {
+          point.stringField(key, String(value || ''));
+        } else {
+          // 其他字段尝试转换为数值，空值使用默认值0
+          const numericValue = safeParseFloat(value);
+          point.floatField(key, numericValue !== null ? numericValue : 0);
+        }
       }
       
       points.push(point);

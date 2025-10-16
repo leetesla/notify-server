@@ -5,6 +5,8 @@
   "scripts": {
     "start": "node ./bin/www",
     "dex-price-fetch": "node scripts/scheduledDexPriceFetch.js",
+    "influx-clear": "node scripts/clear-influx-data.js",
+    "influx-drop-bucket": "node scripts/clear-influx-data.js drop-bucket",
     "pm2:start": "pm2 start ecosystem.config.js",
     "pm2:stop": "pm2 stop notify-server",
     "pm2:restart": "pm2 restart notify-server",
@@ -14,6 +16,7 @@
   },
   "dependencies": {
     "@influxdata/influxdb-client": "^1.35.0",
+    "@influxdata/influxdb-client-apis": "^1.35.0",
     "axios": "^1.12.2",
     "cookie-parser": "~1.4.4",
     "cors": "^2.8.5",
