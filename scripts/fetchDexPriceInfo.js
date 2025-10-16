@@ -139,13 +139,23 @@ async function checkAndAddToRedis(data, tokenNameMap) {
     
     // 遍历数据，检查volume5M是否大于阈值
     for (const item of data) {
+      const tokenAddress = item.tokenContractAddress || '';
       const volume5M = parseFloat(item.volume5M) || 0;
+      
+      // 如果tokenAddress不为空且在redis list: ALERT_EXCEPT 中，则跳过
+      if (tokenAddress) {
+        const isExcepted = await redisClient.lrange(config.REDIS_KEYS.ALERT_EXCEPT, 0, -1)
+          .then(list => list.includes(tokenAddress));
+        if (isExcepted) {
+          console.log(`Token ${tokenAddress} is in ALERT_EXCEPT list, skipping...`);
+          continue;
+        }
+      }
       
       // 如果volume5M大于阈值
       if (volume5M > volumeThreshold) {
         // 获取token名称和地址
         const tokenName = tokenNameMap.get(item.tokenContractAddress) || 'Unknown';
-        const tokenAddress = item.tokenContractAddress || '';
         
         // 检查是否在冷却期内
         const cooldownKey = `cooldown:${tokenAddress}`;
