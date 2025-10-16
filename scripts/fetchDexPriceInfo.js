@@ -2,6 +2,7 @@ const db = require('../database/db');
 const config = require('../config/index');
 const axios = require('axios');
 const { saveDexPriceData } = require('../utils/influxdb');
+const { getTokenNameMap } = require('../database/query');
 
 /**
  * 从数据库获取最近6小时的不重复token地址
@@ -41,6 +42,11 @@ async function sendBatchRequests(tokenAddresses) {
     return;
   }
 
+  // 从数据库获取token名称映射
+  console.log('Fetching token name mapping from database...');
+  const tokenNameMap = await getTokenNameMap(tokenAddresses);
+  console.log(`Retrieved ${tokenNameMap.size} token name mappings`);
+
   // 每批最多100个地址
   const batchSize = 100;
   const batches = [];
@@ -72,10 +78,10 @@ async function sendBatchRequests(tokenAddresses) {
       console.log(`Batch ${i + 1} response status:`, response.status);
       // console.log(response.data)
       
-      // 处理响应数据并保存到 InfluxDB
+      // 处理响应数据并保存到 InfluxDB，传递tokenNameMap
       if (response.data && response.data.data && Array.isArray(response.data.data)) {
         console.log(`Processing ${response.data.data.length} data points`);
-        await saveDexPriceData(response.data.data);
+        await saveDexPriceData(response.data.data, tokenNameMap);
       }
       
       // 如果不是最后一个批次，等待3秒
