@@ -6,7 +6,7 @@ let canPlay = false;
 let isPlaying = false;
 
 // 将硬编码的等待时间提取为常量
-const PLAY_INTERVAL = 2000; // 5秒
+const PLAY_INTERVAL = 20;
 
 // 检查Redis中ALERT_LIVE键的值来设置canPlay状态
 async function updateCanPlayStatus() {
