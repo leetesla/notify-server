@@ -10,11 +10,11 @@ module.exports = {
     node_args: '--max-old-space-size=512', // 设置Node.js堆内存限制
     env: {
       NODE_ENV: 'development',
-      PORT: 5000
+      PORT: 6001
     },
     env_production: {
       NODE_ENV: 'production',
-      PORT: 5000
+      PORT: 6001
     },
     // 添加内存监控
     cron_restart: '0 0 * * *', // 每天重启一次以释放内存
