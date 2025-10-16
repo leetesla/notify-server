@@ -22,5 +22,25 @@ module.exports = {
     error_file: './logs/err.log',
     out_file: './logs/out.log',
     log_date_format: 'YYYY-MM-DD HH:mm:ss'
+  },
+  {
+    name: 'okx-service',
+    script: './bin/okx',
+    instances: 1,
+    exec_mode: 'fork',
+    autorestart: true,
+    watch: false,
+    max_memory_restart: '512M',
+    node_args: '--max-old-space-size=512',
+    env: {
+      NODE_ENV: 'development'
+    },
+    env_production: {
+      NODE_ENV: 'production'
+    },
+    // 日志配置
+    error_file: './logs/okx-err.log',
+    out_file: './logs/okx-out.log',
+    log_date_format: 'YYYY-MM-DD HH:mm:ss'
   }]
 };

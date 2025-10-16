@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
+    "start-okx": "node ./bin/okx",
     "dex-price-fetch": "node scripts/scheduledDexPriceFetch.js",
     "influx-clear": "node scripts/clear-influx-data.js",
     "influx-drop-bucket": "node scripts/clear-influx-data.js drop-bucket",
