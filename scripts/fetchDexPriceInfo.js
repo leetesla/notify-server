@@ -134,15 +134,29 @@ async function checkAndAddToRedis(data, tokenNameMap) {
     // 获取配置的VOLUME_5M阈值，默认为0
     const volumeThreshold = parseFloat(process.env.VOLUME_5M) || 0;
     
+    // 获取冷却时间配置（秒），默认300秒（5分钟）
+    const cooldownTime = parseInt(process.env.COOLDOWN_TIME) || 300;
+    
     // 遍历数据，检查volume5M是否大于阈值
     for (const item of data) {
       const volume5M = parseFloat(item.volume5M) || 0;
       
       // 如果volume5M大于阈值
       if (volume5M > volumeThreshold) {
-        // 获取token名称，如果没有则使用'Unknown'
+        // 获取token名称和地址
         const tokenName = tokenNameMap.get(item.tokenContractAddress) || 'Unknown';
         const tokenAddress = item.tokenContractAddress || '';
+        
+        // 检查是否在冷却期内
+        const cooldownKey = `cooldown:${tokenAddress}`;
+        const lastAlertTime = await redisClient.get(cooldownKey);
+        const currentTime = Math.floor(Date.now() / 1000);
+        
+        // 如果还在冷却期内，则跳过
+        if (lastAlertTime && (currentTime - parseInt(lastAlertTime)) < cooldownTime) {
+          console.log(`Token ${tokenName} (${tokenAddress}) is in cooldown period, skipping Redis write`);
+          continue;
+        }
         
         // 获取当前本地日期
         const currentDate = new Date().toLocaleString('zh-CN', { 
@@ -161,6 +175,9 @@ async function checkAndAddToRedis(data, tokenNameMap) {
         // 向Redis的ALERT_LOG和ALERT_LIVE列表中添加内容
         await redisClient.lpush(config.REDIS_KEYS.ALERT_LOG, redisContent);
         await redisClient.lpush(config.REDIS_KEYS.ALERT_LIVE, redisContent);
+        
+        // 设置冷却时间
+        await redisClient.setex(cooldownKey, cooldownTime, currentTime.toString());
         
         console.log(`Added to Redis: ${tokenName} ${tokenAddress} volume5M=${volume5M}`);
       }
