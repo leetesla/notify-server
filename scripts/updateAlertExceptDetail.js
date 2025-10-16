@@ -64,7 +64,7 @@ async function main() {
     const finalList = await redisClient.lrange(config.REDIS_KEYS.ALERT_EXCEPT_DETAIL, 0, -1);
     console.log('\nALERT_EXCEPT_DETAIL 列表更新完成，最终内容:');
     finalList.forEach((item, index) => {
-      console.log(`${index + 1}. ${item}`);
+      console.log(`✅ ${index + 1}. ${item}`);
     });
     
     console.log('\n脚本执行完成。');

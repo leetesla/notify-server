@@ -1,0 +1,5 @@
+#!/bin/bash
+# 文件名: update-alert-except-detail
+
+cd /Users/chrise/app/notify-server
+npm run update-alert-except-detail
