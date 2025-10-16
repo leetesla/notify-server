@@ -1,5 +1,27 @@
 # 脚本说明
 
+## clearAlertLive.js
+
+### 功能说明
+此脚本用于清空Redis中的ALERT_LIVE列表。
+
+### 使用方法
+```bash
+# 直接运行
+node scripts/clearAlertLive.js
+```
+
+### 工作流程
+1. 连接到Redis服务器
+2. 获取ALERT_LIVE列表当前长度
+3. 清空ALERT_LIVE列表
+4. 显示清空前后的列表长度
+5. 完成后退出程序
+
+### 注意事项
+- 执行后将无法恢复已清空的数据
+- 脚本执行完毕后会自动退出
+
 ## updateAlertExceptDetail.js
 
 ### 功能说明
