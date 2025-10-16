@@ -24,7 +24,7 @@ async function main() {
       
       // 显示每个将要被清空的项目
       allItems.forEach((item, index) => {
-        console.log(`   ${index + 1}. 📝 ${item}`);
+        console.log(`${index + 1}. 📝 ${item}`);
       });
       console.log('*********************************   ');
       console.log(`💥 总共 ${allItems.length} 个项目将被清空`);

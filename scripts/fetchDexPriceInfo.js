@@ -4,6 +4,7 @@ const axios = require('axios');
 const { saveDexPriceData } = require('../utils/influxdb');
 const { getTokenNameMap } = require('../database/query');
 const redisClient = require('../config/redis');
+const { formatMarketCapToString } = require('../utils/formatters');
 
 /**
  * 从数据库获取最近6小时的不重复token地址
@@ -141,6 +142,8 @@ async function checkAndAddToRedis(data, tokenNameMap) {
     for (const item of data) {
       const tokenAddress = item.tokenContractAddress || '';
       const volume5M = parseFloat(item.volume5M) || 0;
+      const marketCap = parseFloat(item.marketCap) || 0;
+      const marketCapStr = formatMarketCapToString(marketCap);
       
       // 如果tokenAddress不为空且在redis list: ALERT_EXCEPT 中，则跳过
       if (tokenAddress) {
@@ -180,7 +183,7 @@ async function checkAndAddToRedis(data, tokenNameMap) {
         });
         
         // 构造要添加到Redis的内容
-        const redisContent = `${tokenName} ${tokenAddress}\nvolume5M=${volume5M} > VOLUME_5M=${volumeThreshold}\n${currentDate}`;
+        const redisContent = `${tokenName} ${tokenAddress}\nvolume5M=${volume5M} MC=${marketCapStr}\n${currentDate}`;
         
         // 向Redis的ALERT_LOG和ALERT_LIVE列表中添加内容
         await redisClient.lpush(config.REDIS_KEYS.ALERT_LOG, redisContent);
@@ -189,7 +192,7 @@ async function checkAndAddToRedis(data, tokenNameMap) {
         // 设置冷却时间
         await redisClient.setex(cooldownKey, cooldownTime, currentTime.toString());
         
-        console.log(`Added to Redis: ${tokenName} ${tokenAddress} volume5M=${volume5M}`);
+        console.log(`Added to Redis: ${tokenName} ${tokenAddress} volume5M=${volume5M} MC=${marketCapStr}`);
       }
     }
   } catch (error) {

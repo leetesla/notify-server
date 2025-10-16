@@ -97,10 +97,38 @@ function formatJson(obj) {
   return JSON.stringify(obj, null, 2);
 }
 
+/**
+ * 将数值转换为带单位的字符串表示形式
+ * @param {number} value - 要转换的数值
+ * @returns {string} 带单位的字符串表示
+ */
+function formatMarketCapToString(value) {
+  // 检查是否为null, undefined, 或 NaN
+  if (value === null || value === undefined || isNaN(value)) return '';
+  
+  // 小于1000保持原样
+  if (value < 1000) {
+    return value.toString();
+  }
+  // 大于等于1000且小于1000000转为nK
+  else if (value < 1000000) {
+    return (value / 1000).toFixed(1) + 'K';
+  }
+  // 大于等于1000000且小于1000000000转为nM
+  else if (value < 1000000000) {
+    return (value / 1000000).toFixed(1) + 'M';
+  }
+  // 大于等于1000000000转为nB
+  else {
+    return (value / 1000000000).toFixed(1) + 'B';
+  }
+}
+
 module.exports = {
   formatMarketCap,
   toInteger,
   formatMultiplier,
   formatPercentage,
-  formatJson
+  formatJson,
+  formatMarketCapToString
 };
