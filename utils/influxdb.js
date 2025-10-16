@@ -51,6 +51,11 @@ async function saveDexPriceData(data, tokenNameMap = new Map()) {
         // tokenContractAddress作为字符串存储
         if (key === 'tokenContractAddress') {
           point.stringField(key, String(value || ''));
+        } 
+        // chainIndex 应该作为整数存储
+        else if (key === 'chainIndex') {
+          const intValue = parseInt(value);
+          point.intField(key, !isNaN(intValue) ? intValue : 0);
         } else {
           // 其他字段尝试转换为数值，空值使用默认值0
           const numericValue = safeParseFloat(value);
