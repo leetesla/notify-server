@@ -59,7 +59,8 @@ async function sendBatchRequests(tokenAddresses) {
     
     try {
       const response = await axios.post(`${config.OKX_PROXY_API_URL}/dex-price-info`, {
-        token_addrs: batch
+        token_addrs: batch,
+          chain_index: 56 // BSC 56
       }, {
         headers: {
           'API-SECRET': config.OKX_PROXY_API_SECRET,
@@ -68,6 +69,7 @@ async function sendBatchRequests(tokenAddresses) {
       });
       
       console.log(`Batch ${i + 1} response status:`, response.status);
+        console.log(response.data)
       // 可以在这里处理响应数据
       
       // 如果不是最后一个批次，等待3秒
