@@ -27,6 +27,9 @@ const config = {
   INFLUXDB_ORG: process.env.INFLUXDB_ORG || 'default',
   INFLUXDB_BUCKET: process.env.INFLUXDB_BUCKET || 'crypto_data',
   
+  // Volume阈值配置
+  VOLUME_5M: process.env.VOLUME_5M || 500000,
+  
   // Redis 键常量
   REDIS_KEYS,
   

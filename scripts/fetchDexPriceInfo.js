@@ -3,6 +3,7 @@ const config = require('../config/index');
 const axios = require('axios');
 const { saveDexPriceData } = require('../utils/influxdb');
 const { getTokenNameMap } = require('../database/query');
+const redisClient = require('../config/redis');
 
 /**
  * 从数据库获取最近6小时的不重复token地址
@@ -81,6 +82,8 @@ async function sendBatchRequests(tokenAddresses) {
       // 处理响应数据并保存到 InfluxDB，传递tokenNameMap
       if (response.data && response.data.data && Array.isArray(response.data.data)) {
         console.log(`Processing ${response.data.data.length} data points`);
+        // 检查volume5M是否大于配置的阈值，并将符合条件的数据添加到Redis
+        await checkAndAddToRedis(response.data.data, tokenNameMap);
         await saveDexPriceData(response.data.data, tokenNameMap);
       }
       
@@ -121,6 +124,52 @@ async function main() {
   }
 }
 
+/**
+ * 检查volume5M是否大于配置的阈值，并将符合条件的数据添加到Redis
+ * @param {Array} data - DEX价格数据数组
+ * @param {Map} tokenNameMap - token地址到名称的映射
+ */
+async function checkAndAddToRedis(data, tokenNameMap) {
+  try {
+    // 获取配置的VOLUME_5M阈值，默认为0
+    const volumeThreshold = parseFloat(process.env.VOLUME_5M) || 0;
+    
+    // 遍历数据，检查volume5M是否大于阈值
+    for (const item of data) {
+      const volume5M = parseFloat(item.volume5M) || 0;
+      
+      // 如果volume5M大于阈值
+      if (volume5M > volumeThreshold) {
+        // 获取token名称，如果没有则使用'Unknown'
+        const tokenName = tokenNameMap.get(item.tokenContractAddress) || 'Unknown';
+        const tokenAddress = item.tokenContractAddress || '';
+        
+        // 获取当前本地日期
+        const currentDate = new Date().toLocaleString('zh-CN', { 
+          timeZone: 'Asia/Shanghai',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+        
+        // 构造要添加到Redis的内容
+        const redisContent = `${tokenName} ${tokenAddress}\nvolume5M=${volume5M} > VOLUME_5M=${volumeThreshold}\n${currentDate}`;
+        
+        // 向Redis的ALERT_LOG和ALERT_LIVE列表中添加内容
+        await redisClient.lpush(config.REDIS_KEYS.ALERT_LOG, redisContent);
+        await redisClient.lpush(config.REDIS_KEYS.ALERT_LIVE, redisContent);
+        
+        console.log(`Added to Redis: ${tokenName} ${tokenAddress} volume5M=${volume5M}`);
+      }
+    }
+  } catch (error) {
+    console.error('Error checking volume and adding to Redis:', error.message);
+  }
+}
+
 // 如果直接运行此脚本，则执行主函数
 if (require.main === module) {
   main();
@@ -129,5 +178,6 @@ if (require.main === module) {
 module.exports = {
   getRecentTokenAddresses,
   sendBatchRequests,
-  main
+  main,
+  checkAndAddToRedis
 };
