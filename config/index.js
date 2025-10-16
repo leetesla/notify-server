@@ -21,6 +21,12 @@ const config = {
   REDIS_URL: process.env.REDIS_URL || 'redis://localhost:6379',
   REDIS_PASSWORD: process.env.REDIS_PASSWORD || '',
   
+  // InfluxDB 配置
+  INFLUXDB_URL: process.env.INFLUXDB_URL || 'http://localhost:8086',
+  INFLUXDB_TOKEN: process.env.INFLUXDB_TOKEN || '',
+  INFLUXDB_ORG: process.env.INFLUXDB_ORG || 'default',
+  INFLUXDB_BUCKET: process.env.INFLUXDB_BUCKET || 'crypto_data',
+  
   // Redis 键常量
   REDIS_KEYS,
   

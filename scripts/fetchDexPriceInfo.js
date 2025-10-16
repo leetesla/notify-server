@@ -1,6 +1,7 @@
 const db = require('../database/db');
 const config = require('../config/index');
 const axios = require('axios');
+const { saveDexPriceData } = require('../utils/influxdb');
 
 /**
  * 从数据库获取最近6小时的不重复token地址
@@ -69,8 +70,13 @@ async function sendBatchRequests(tokenAddresses) {
       });
       
       console.log(`Batch ${i + 1} response status:`, response.status);
-        console.log(response.data)
-      // 可以在这里处理响应数据
+      // console.log(response.data)
+      
+      // 处理响应数据并保存到 InfluxDB
+      if (response.data && response.data.data && Array.isArray(response.data.data)) {
+        console.log(`Processing ${response.data.data.length} data points`);
+        await saveDexPriceData(response.data.data);
+      }
       
       // 如果不是最后一个批次，等待3秒
       if (i < batches.length - 1) {
