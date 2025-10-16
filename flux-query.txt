@@ -1,0 +1,5 @@
+from(bucket: "mybucket")
+  |> range(start: -4h)
+  |> filter(fn: (r) => r._measurement == "dex_price_info")
+  |> filter(fn: (r) => r._field == "volume5M")
+  |> filter(fn: (r) => r._field == "marketCap")
