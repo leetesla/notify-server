@@ -8,6 +8,7 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 // Redis 键常量定义
 const REDIS_KEYS = {
   ALERT_EXCEPT: 'ALERT_EXCEPT', // list
+  ALERT_EXCEPT_DETAIL: 'ALERT_EXCEPT_DETAIL', // list
   ALERT_LOG: 'ALERT_LOG',
   ALERT_LIVE: 'ALERT_LIVE'
 };

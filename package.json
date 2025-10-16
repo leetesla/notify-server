@@ -8,6 +8,7 @@
     "dex-price-fetch": "node scripts/scheduledDexPriceFetch.js",
     "influx-clear": "node scripts/clear-influx-data.js",
     "influx-drop-bucket": "node scripts/clear-influx-data.js drop-bucket",
+    "update-alert-except-detail": "node scripts/updateAlertExceptDetail.js",
     "pm2:start": "pm2 start ecosystem.config.js",
     "pm2:stop": "pm2 stop notify-server",
     "pm2:restart": "pm2 restart notify-server",
