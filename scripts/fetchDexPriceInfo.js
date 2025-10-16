@@ -142,6 +142,7 @@ async function checkAndAddToRedis(data, tokenNameMap) {
     for (const item of data) {
       const tokenAddress = item.tokenContractAddress || '';
       const volume5M = parseFloat(item.volume5M) || 0;
+      const volume5MStr = formatMarketCapToString(volume5M);
       const marketCap = parseFloat(item.marketCap) || 0;
       const marketCapStr = formatMarketCapToString(marketCap);
       
@@ -183,7 +184,7 @@ async function checkAndAddToRedis(data, tokenNameMap) {
         });
         
         // 构造要添加到Redis的内容
-        const redisContent = `${tokenName} ${tokenAddress}\nvolume5M=${volume5M} MC=${marketCapStr}\n${currentDate}`;
+        const redisContent = `${tokenName} ${tokenAddress}\nvolume5M=${volume5MStr} MC=${marketCapStr}\n${currentDate}`;
         
         // 向Redis的ALERT_LOG和ALERT_LIVE列表中添加内容
         await redisClient.lpush(config.REDIS_KEYS.ALERT_LOG, redisContent);
