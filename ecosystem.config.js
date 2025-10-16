@@ -42,5 +42,25 @@ module.exports = {
     error_file: './logs/okx-err.log',
     out_file: './logs/okx-out.log',
     log_date_format: 'YYYY-MM-DD HH:mm:ss'
+  },
+  {
+    name: 'play-music',
+    script: 'npm',
+    args: 'run play-music',
+    instances: 1,
+    exec_mode: 'fork',
+    autorestart: true,
+    watch: false,
+    max_memory_restart: '256M',
+    env: {
+      NODE_ENV: 'development'
+    },
+    env_production: {
+      NODE_ENV: 'production'
+    },
+    // 日志配置
+    error_file: './logs/music-err.log',
+    out_file: './logs/music-out.log',
+    log_date_format: 'YYYY-MM-DD HH:mm:ss'
   }]
 };
